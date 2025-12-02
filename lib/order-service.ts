@@ -1,4 +1,5 @@
 import { appwrite, appwriteConfig } from "./appwrite"
+import { Query } from "appwrite"
 import type { Order, User } from "./types"
 import { mockOrders } from "./mock-orders"
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail } from "./email-service"
@@ -33,7 +34,8 @@ function parseAddress(addressString: string): any {
 // Update the getOrders function to parse items and addresses
 export async function getOrders(userId?: string): Promise<Order[]> {
   try {
-    const queries = userId ? [`userId=${userId}`] : []
+    console.log('Fetching orders for userId:', userId)
+    const queries = userId ? [Query.equal('userId', userId)] : []
 
     const response = await appwrite.database.listDocuments(
       appwriteConfig.databaseId,
@@ -41,21 +43,23 @@ export async function getOrders(userId?: string): Promise<Order[]> {
       queries,
     )
 
+    console.log(`Found ${response.documents.length} orders in database`)
+
     // Parse the items and addresses strings to JSON for each order
-    return response.documents.map((order: any) => ({
+    const orders = response.documents.map((order: any) => ({
       ...order,
+      id: order.$id || order.id,
       items: typeof order.items === "string" ? parseOrderItems(order.items) : order.items,
       shippingAddress: typeof order.shippingAddress === "string" ? parseAddress(order.shippingAddress) : order.shippingAddress,
       billingAddress: typeof order.billingAddress === "string" ? parseAddress(order.billingAddress) : order.billingAddress,
     })) as Order[]
+
+    console.log('Parsed orders:', orders.map(o => ({ id: o.id, userId: o.userId })))
+    return orders
   } catch (error) {
-    console.error("Error fetching orders:", error)
-    // Fallback to mock data
-    console.log("Falling back to mock orders data")
-    if (userId) {
-      return mockOrders.filter((order) => order.userId === userId)
-    }
-    return mockOrders
+    console.error("Error fetching orders from database:", error)
+    // Return empty array instead of mock data
+    return []
   }
 }
 

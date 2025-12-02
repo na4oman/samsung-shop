@@ -31,8 +31,10 @@ export default function OrdersPage() {
       if (!user) return
 
       try {
+        console.log('Orders Page: Fetching orders for user:', user.userId, user.email)
         // Fetch orders for the current user
         const userOrders = await getOrders(user.userId)
+        console.log('Orders Page: Received orders:', userOrders.length)
         if (isMounted) {
           setOrders(userOrders)
         }

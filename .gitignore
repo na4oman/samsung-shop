@@ -18,6 +18,16 @@ yarn-error.log*
 
 # env files
 .env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# API keys
+*.key
+*.pem
+secrets/
 
 # vercel
 .vercel
@@ -25,3 +35,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Temporary/debug markdown files (but keep README.md and SEO_IMPROVEMENTS.md)
+*_SETUP*.md
+*_INSTRUCTIONS*.md
+*_CHANGES*.md
+*_APPLIED*.md
+*_ERROR*.md
+TEST_*.md
+FIXES_*.md
+HOW_TO_*.md

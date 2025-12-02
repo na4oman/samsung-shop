@@ -1,18 +1,17 @@
-import { Resend } from 'resend'
+import sgMail from '@sendgrid/mail'
 import type { Order, User } from "./types"
 
 // Email configuration
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@samsungdisplayshop.com"
-const RESEND_API_KEY = process.env.RESEND_API_KEY
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY
+const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || "noreply@samsungdisplayshop.com"
 
-// Lazy initialization of Resend
-let resend: Resend | null = null
-function getResendInstance(): Resend | null {
-  if (!RESEND_API_KEY) return null
-  if (!resend) {
-    resend = new Resend(RESEND_API_KEY)
-  }
-  return resend
+// Initialize SendGrid
+if (SENDGRID_API_KEY) {
+  sgMail.setApiKey(SENDGRID_API_KEY)
+  console.log('SendGrid initialized successfully')
+} else {
+  console.warn('SendGrid API key not found - emails will be logged to console')
 }
 
 interface OrderEmailData {
@@ -169,13 +168,11 @@ function generateEmailSubject(order: Order): string {
   return `New Order #${order.id} - $${order.total.toFixed(2)} - Samsung Display Shop`
 }
 
-// Send admin notification email using Resend
+// Send admin notification email using SendGrid
 export async function sendOrderNotificationEmail({ order, user }: OrderEmailData): Promise<boolean> {
   try {
-    const resendInstance = getResendInstance()
-    
-    if (!RESEND_API_KEY || !resendInstance) {
-      console.warn("RESEND_API_KEY not configured, falling back to console logging")
+    if (!SENDGRID_API_KEY) {
+      console.warn("SENDGRID_API_KEY not configured, falling back to console logging")
       const subject = generateEmailSubject(order)
       const content = generateAdminEmailContent({ order, user })
       
@@ -194,15 +191,18 @@ export async function sendOrderNotificationEmail({ order, user }: OrderEmailData
 
     console.log(`Sending admin notification email for order ${order.id}...`)
 
-    const result = await resendInstance.emails.send({
-      from: 'Samsung Display Shop <onboarding@resend.dev>',
+    const msg = {
       to: ADMIN_EMAIL,
+      from: SENDGRID_FROM_EMAIL,
       subject: subject,
       text: textContent,
       html: htmlContent,
-    })
+    }
 
-    console.log(`Admin notification email sent successfully:`, result)
+    const result = await sgMail.send(msg)
+
+    console.log(`Admin notification email sent successfully via SendGrid`)
+    console.log(`Response status: ${result[0].statusCode}`)
     return true
   } catch (error) {
     console.error("Failed to send order notification email:", error)
@@ -210,13 +210,11 @@ export async function sendOrderNotificationEmail({ order, user }: OrderEmailData
   }
 }
 
-// Send customer confirmation email using Resend
+// Send customer confirmation email using SendGrid
 export async function sendCustomerConfirmationEmail({ order, user }: OrderEmailData): Promise<boolean> {
   try {
-    const resendInstance = getResendInstance()
-    
-    if (!RESEND_API_KEY || !resendInstance) {
-      console.warn("RESEND_API_KEY not configured, falling back to console logging")
+    if (!SENDGRID_API_KEY) {
+      console.warn("SENDGRID_API_KEY not configured, falling back to console logging")
       const subject = `Order Confirmation #${order.id} - Samsung Display Shop`
       const content = `
 Dear ${user.name},
@@ -269,19 +267,25 @@ Samsung Display Shop Team
     const htmlContent = generateCustomerEmailHTML({ order, user })
 
     console.log(`Sending customer confirmation email for order ${order.id}...`)
+    console.log(`Customer email address: ${user.email}`)
 
-    const result = await resendInstance.emails.send({
-      from: 'Samsung Display Shop <onboarding@resend.dev>',
+    const msg = {
       to: user.email,
+      from: SENDGRID_FROM_EMAIL,
       subject: subject,
       text: textContent,
       html: htmlContent,
-    })
+    }
 
-    console.log(`Customer confirmation email sent successfully:`, result)
+    const result = await sgMail.send(msg)
+
+    console.log(`Customer confirmation email sent successfully via SendGrid`)
+    console.log(`Response status: ${result[0].statusCode}`)
     return true
   } catch (error) {
-    console.error("Failed to send customer confirmation email:", error)
+    console.error("❌ Failed to send customer confirmation email:", error)
+    console.error("Error details:", JSON.stringify(error, null, 2))
+    console.error("Customer email was:", user.email)
     return false
   }
 }

@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* Brand Colors - Based on your logo */
+    --brand-primary: 180 100% 22%; /* #006f6f - Teal from logo */
+    --brand-secondary: 0 0% 20%; /* #323232 - Dark gray from logo */
+    
+    /* Base Colors */
+    --background: 0 0% 100%; /* White background */
+    --foreground: 0 0% 20%; /* Dark gray text (#323232) */
+    
+    /* Card Colors */
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 0 0% 20%; /* Dark gray text on cards */
+    
+    /* Popover Colors */
+    --popover: 0 0% 100%; /* White popover */
+    --popover-foreground: 0 0% 20%; /* Dark gray text */
+    
+    /* Primary Colors - Your teal brand color */
+    --primary: 180 100% 22%; /* #006f6f */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    
+    /* Secondary Colors - Your dark gray */
+    --secondary: 0 0% 96%; /* Light gray background */
+    --secondary-foreground: 0 0% 20%; /* Dark gray text */
+    
+    /* Muted Colors */
+    --muted: 0 0% 96%; /* Light gray */
+    --muted-foreground: 0 0% 45%; /* Medium gray */
+    
+    /* Accent Colors - Lighter teal */
+    --accent: 180 50% 95%; /* Very light teal */
+    --accent-foreground: 180 100% 22%; /* Teal text */
+    
+    /* Destructive Colors */
+    --destructive: 0 84% 60%; /* Red for errors */
+    --destructive-foreground: 0 0% 98%; /* White text on red */
+    
+    /* Border and Input Colors */
+    --border: 0 0% 90%; /* Light gray borders */
+    --input: 0 0% 90%; /* Light gray input backgrounds */
+    --ring: 180 100% 22%; /* Teal focus rings */
+    
+    /* Chart Colors - Teal variations */
+    --chart-1: 180 100% 22%; /* Primary teal */
+    --chart-2: 180 80% 35%; /* Lighter teal */
+    --chart-3: 180 60% 50%; /* Even lighter teal */
+    --chart-4: 0 0% 20%; /* Dark gray */
+    --chart-5: 0 0% 60%; /* Medium gray */
+    
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
